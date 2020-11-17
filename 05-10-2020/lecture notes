@@ -1,0 +1,178 @@
+# organisational stuff
+
+ -bring laptop
+ -20 page paper as project in the end
+ -oral exam and project make up mark
+
+# first lecture:
+## overview:
+ - in physics we have theoretical, experimental and computational physics
+ - c.p. looks at models (same as t.p.)
+ - c.p. has algorithms (similar to appratus to e.p.)
+ - c.p. has runs (similar to measurements in e.p.)
+ - c.p. has to debug (similar to calibrate in e.p.)
+
+monte carlo is a big part of c.p.
+
+## Moore's law:
+In every 18 months the number of transistors on a chip doubles
+
+### historical overview
+year        computer        bits        flops       energy J / flops
+1950        UNIVAC          3           10^3        10^2
+1980        Isay (?)        10^8        10^8        10^-4
+2010        Bluegame        10^15       10^14       10^-9
+2018        Summit machine  10^16       10^17       10^-10
+
+in terms of memory 1 bit / per atoms would be the limit
+in terms of speed we are limited by speed of light (signal between
+transistors)
+calculations always take energy, they increase entropy; this limits the
+energy usage
+nowadays we don't really double the transistor count but we are getting
+better at parallelization, thus we do get more calculation speed
+
+## example: Ising model
+
+spin S_z elem {-1, 1}
+vec{n} elem \omega lattice in d dimensions
+| \omega | = L^d (L points in each axis)
+
+example configuration:
+
++   -   -   +
+-   +   -   +
+-   -   +   +
+-   +   -   -
+
+### energy for one configuration:
+
+H[s] = \sum_\vec{n} \sum_{\nu=1}^d S_\vec{n}S_{\vec{n}+\vec{nu}} - \mu h \sum_{\vec{n}}S_\vec{\n}}
+
+### magnetization:
+M[s] = 1/V * \sum_{\vec{n}} S_{\vec{n}}
+
+### canonical ensemble:
+
+{s} set of all configuration; b = 1/{k_B*T}
+Z = \sum_{{s}} = e^{-\beta H[s]}
+
+### expectation value:
+F[s]
+<F> = 1/Z \sum_{{s}} F[s]P[s]
+P[s] = e^{-\beta H[s]} ... probabilities
+
+### example:
+L = 100
+d = 3
+=> V = 10^6
+#s = 2^V \approx 10^{3^10^5}
+
+## example: fundamental theories
+QCD: 8 gluons, 6 quarks
+
+scalar theory: \phi ... real field
+\phi(\vec{x}, t)
+S[\phi] = \int d^4x \lagrange[\phi(x)] = -1/2 \int d^4x (\partial_r \phi)(\partial^r\phi) + (m^2\phi^2)/2 + \lambda\phi^4/24
+last term is interaction
+
+### path integral
+<F> = 1/N\int D\phi e^{-hS[\phi]}F[\phi]
+F is an observable
+D\phi is a path integral
+
+path integral on a lattice:
+\phi(x)->\phi_{\vec{x}} \vec{x} elem \Omega (lattice)
+D\phi -> \Pi_x d\phi_x
+
+a stepsize in lattice
+\partial_\mu\phi -> (\phi(\vec{x}+\vec{\mu})-\phi({\vec{x}-\vec{\mu}}))/2a
+S[\phi] = \sum_{n elem \Omega}( a^4 -1/2((\phi(\vec{x}+\vec{\mu})-\phi({\vec{x}-\vec{\mu}}))/2a) +1/2 m^2\phi^2_{\vec{n}} + \lambda \phi_{\vec{n}}}/24)
+
+<F> = 1/N \int\Pi_n d\phi_{\vec{n}}e^{-hS[\phi]} F[\phi]
+
+
+## calculate \pi
+
+\int_0^1\sqrt{1-x^2}dx = \int_0^1\int_0^1 \theta(1-x^2-y^2)
+
+insert diagram of a quarter of a sphere here
+
+### first method: trapezoid rule
+
+we divide the interval into N intervals
+
+\int_a^b f(x) dx = \sum (f(a+i(b-a)/N) + f(a+(i+1)(b-a)/N))/2 * (b-a)/N
+
+std \approx 1/N^2
+
+### second method: 
+
+we take r_i elem [0,1] with i=1, ..., 2N
+x_i = r_i, y_i = r_{i+N}
+
+n_{in} = #indicies for which x_i^2 +y_i^2 < 1
+
+\pi/4 = n_{in} / N
+
+N           \pi
+1000        3,141
+10^5        3,1409
+
+each point has p=\pi/4 chance to be in the circle and a q = 1-\pi/4 to
+be out
+
+n_in has a binomial distribution
+<\delta n_{in}> = <(n-<n>)^2> = N*p*q
+<n_{in}> = N*p
+<\delta (n_{in}/N)> = N*p*q/N^2=p*q/N
+
+std \approx \sqrt{1/N}
+
+## calculate \pi
+
+volume of 10D-sphere V = r^10\pi^5/120 = \int_0^r \Pi_{i=1}^9 dx_i \sqrt{1-\sum_{i=1}^9-x_i^2}
+
+### method 1: trapezoid rule
+
+std \approx 1/N^2 if we have points inside the dim
+N= 10 -> 10^9 calculation -> 0-1 seconds on a desktop pc -> error = 1/100
+
+### method 2: monte carlo
+x_i elem [0,1] random
+n_{in} = # of points inside \sum_{i=1}^10x_i^2 <= 1
+
+std = 1/\sqrt{N} N=10^9 \approx 1/10^{4.5}
+
+
+
+M = N^d # number of calculation
+error trapezoid \approx 1/N^2 = 1/M^{2/d}
+error monte carlo \approx 1/\sqrt{M}
+
+thus for high dimensional stuff monte carlo is much better in terms of error
+
+
+## Sampling
+
+in the first case (quarter sphere) we could also have done 
+
+f(x) quarter sphere; x_i random numbers of uniform dist. between [0,1]
+lim_{N->\inf} 1/N \sum f(x_i) = \int_0^1 f(x) dx
+
+\int_1^b g(x)f(x)dx= ?
+x_i elem [a,b] dist. f(x), independent
+MC_estimator = 1/N \sum g(x_i) = \int_a^b f(x)g(x)dx
+
+MC_est. = 1/N^2 (\sum_{i=1}^N \delta g(x_i)) = 1/N\delta g(x_i) because they are independent
+varianz \delta g(x_i) \approx 1/\sqrt{N}
+
+we can split the function into multiple probability distributions:
+a prob. dist has to be normalized, greater or equal to zero
+if we can't split into strictly postiive functions we call that a "sign problem"
+
+f(x) =1 simple sampling; naive
+f(x) != 1 biased sampling; importance sampling (f(x) \approx e^{-\beta H})
+
+
+first two exmaples will be monte carlo for 2D and 10D spehere
